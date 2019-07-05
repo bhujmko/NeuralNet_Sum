@@ -24,4 +24,12 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="a.out">
+      <Filter>Исходные файлы</Filter>
+    </None>
+    <None Include="a.in">
+      <Filter>Исходные файлы</Filter>
+    </None>
+  </ItemGroup>
 </Project>

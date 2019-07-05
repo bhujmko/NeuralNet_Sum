@@ -1,3 +1,7 @@
 ﻿  main.cpp
-c:\projects\neuralnet_sum\neuralnet_sum\neuron.h(20): warning C4018: <: несоответствие типов со знаком и без знака
+c:\projects\neuralnet_sum\neuralnet_sum\neuron.h(15): warning C4018: <: несоответствие типов со знаком и без знака
+c:\projects\neuralnet_sum\neuralnet_sum\neuron.h(25): warning C4018: <: несоответствие типов со знаком и без знака
+c:\projects\neuralnet_sum\neuralnet_sum\main.cpp(14): warning C4018: <: несоответствие типов со знаком и без знака
+c:\projects\neuralnet_sum\neuralnet_sum\main.cpp(32): warning C4018: <: несоответствие типов со знаком и без знака
+c:\projects\neuralnet_sum\neuralnet_sum\main.cpp(45): warning C4018: <: несоответствие типов со знаком и без знака
   NeuralNet_Sum.vcxproj -> C:\Projects\NeuralNet_Sum\Debug\NeuralNet_Sum.exe

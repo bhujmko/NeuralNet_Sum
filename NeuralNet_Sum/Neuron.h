@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -8,6 +9,10 @@ public:
 	Neuron(int num) {
 		inputs.resize(num);
 		weights.resize(num);
+	}
+
+	void input_values(std::vector<double> val) {
+		for (int i = 0; i < val.size(); i++) inputs[i] = val[i];
 	}
 
 	void setWeights() {
@@ -23,7 +28,7 @@ public:
 	}
 
 	double activate(double val) {
-		double res = 1 / (1 + exp(-1 * val));
+		double res = 1 / (1 + exp(-4 * val));
 		return res;
 	}
 
