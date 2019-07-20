@@ -1,97 +1,78 @@
 #include "Neuron.h"
 
-void MakeWeb(std::vector<std::vector<Neuron>>& neurons) {
-	neurons.emplace_back(std::vector<Neuron>());
-	neurons.emplace_back(std::vector<Neuron>());
-	
-	for (int i = 0; i < 3; i++) neurons[0].emplace_back(Neuron(2)); //first hiden layer initialization
-
-	neurons[1].emplace_back(Neuron(2));  //second hiden layer initialization
-	neurons[1].emplace_back(Neuron(2));
-	neurons[1].emplace_back(Neuron(1));
-
-	for (int i = 0; i < 2; i++) //add random value of weights
-		for (int j = 0; j < neurons[i].size(); j++) neurons[i][j].setWeights();
+void MakeWeb(std::vector<Neuron>& neurons) {
+	for (int i = 0; i < 1000; i++) {
+		neurons.emplace_back(Neuron(1000 - i));
+		neurons.back().setWeights();
+	}
 
 	return;
 }
 
-int UseWeb(std::vector<std::vector<Neuron>>& neurons, int val1, int val2) {
-	std::vector<double> hundredsRank = { double(val1 / 100),double(val2 / 100) };
-	std::vector<double> tensRank = { double(val1 / 10 % 10),double(val2 / 10 % 10) };
-	std::vector<double> unitsRank = { double(val1 % 10),double(val2 % 10) };
+int UseWeb(std::vector<Neuron>& neurons, int val1, int val2) {
+	std::vector<double> vals = { double(val1),double(val2) };
 
-	//FIRST LAYER
-
-	neurons[0][0].input_values(hundredsRank);	//input
-	neurons[0][1].input_values(tensRank);
-	neurons[0][2].input_values(unitsRank);
-
-	std::vector<double> output(3); //output of first layer
-
-	for (int i = 0; i < neurons[0].size(); i++)
-		output[i] = neurons[0][i].activate(neurons[0][i].multiplie());
-
-	//SECOND LAYER
-
-	std::vector<double> inp0 = { output[0],output[1] };
-	std::vector<double> inp1 = { output[1],output[2] };
-	std::vector<double> inp2 = { output[2] };
-
-	neurons[1][0].input_values(inp0);	//input
-	neurons[1][1].input_values(inp1);
-	neurons[1][2].input_values(inp2);
-
-	for (int i = 0; i < neurons[1].size(); i++)	//output of second layer
-		output[i] = neurons[1][i].activate(neurons[1][i].multiplie());
-
-	//MAKE RESULT
-
-	int res = 100 * int(output[0] * 2 * 100) % 10 + 
-		10 * int(output[1] * 2 * 100) % 10 + 
-		int(output[2] * 2 * 100) % 10;
-
-	return res;
+	for (auto& i : neurons) {
+		i.inputValues(vals);
+		
+		if (i.activate(i.multiplie())) return i.output();
+	}
+	
+	return 0;
 }
 
-void MakeDataSet() {
-	int a;
-	int b;
-	int sum;
-
-	srand(NULL);
-
-	for (int i = 0; i < 100; i++) {
-		a = rand() % 500;
-		b = rand() % 500;
-		sum = a + b;
-		std::cout << a << ' ' << b << ' ' << sum << '\n';
+void MakeInputValues(int& v1, int& v2) {
+	if (v1 > 0) v1--;
+	else if (v2 > 0) v2--;
+	else {
+		v1 = 500; v2 = 500;
 	}
-
 	return;
 }
 
 int main() {
-	freopen("a.in", "r", stdin);
-	freopen("a.out", "w", stdout);
-	
-	std::vector<std::vector<Neuron>> neurons;
+	/*freopen("a.in", "r", stdin);
+	freopen("a.out", "w", stdout);*/
+
+#define LR double(0.1)
+
+	std::ios::sync_with_stdio(false);
+	srand(time(NULL));
+
+	std::vector<Neuron> neurons;
 
 	MakeWeb(neurons);
 
-	int val1;
-	int val2;
-	int result;
-	int cnt = 1;
+	int val1 = 500;
+	int val2 = 500;
+	int cnt = 0;
+	int mx = cnt;
 
-	while (std::cin >> val1 >> val2 >>result) {
-		if (UseWeb(neurons, val1, val2) != result) {
-			std::cout << cnt++ << ") -\n";
+	while (true) {
+		int ans = UseWeb(neurons, val1, val2);
+		int TrueResult = val1 + val2;
 
-			//learn
+		if (ans != TrueResult) {
+			cnt = 0;
+
+			for (auto& i : neurons) {
+				if (i.output() > TrueResult)
+					if (i.activate(i.multiplie())) i.learn(0, LR);
+				else if (!i.activate(i.multiplie())) i.learn(0.75, LR);
+			}
 		}
-		else std::cout << cnt++ << ") +\n";
+		else if (cnt >= 1000) break;
+		else cnt++;
+
+		system("cls");
+		if (mx < cnt) mx = cnt;
+		std::cout << mx;
+
+		MakeInputValues(val1, val2);
 	}
+
+	while (std::cin >> val1 >> val2)
+		std::cout << UseWeb(neurons, val1, val2) << '\n';
 
 	return 0;
 }
