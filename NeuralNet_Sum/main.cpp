@@ -1,78 +1,114 @@
 #include "Neuron.h"
 
-void MakeWeb(std::vector<Neuron>& neurons) {
-	for (int i = 0; i < 1000; i++) {
-		neurons.emplace_back(Neuron(1000 - i));
+void MakeWeb(std::vector<Neuron>& neurons, const int cnt) {
+	for (int i = 0; i < cnt; i++) {
+		neurons.emplace_back(Neuron(i));
 		neurons.back().setWeights();
 	}
 
 	return;
 }
 
-int UseWeb(std::vector<Neuron>& neurons, int val1, int val2) {
-	std::vector<double> vals = { double(val1),double(val2) };
-
-	for (auto& i : neurons) {
-		i.inputValues(vals);
-		
-		if (i.activate(i.multiplie())) return i.output();
-	}
-	
-	return 0;
+double kv(const double& a, const double& b) {
+	return (a - b)*(a - b);
 }
 
-void MakeInputValues(int& v1, int& v2) {
-	if (v1 > 0) v1--;
-	else if (v2 > 0) v2--;
+int UseWeb(std::vector<Neuron>& neurons, std::vector<double>& v) {
+	int ans;
+	double val = 0;
+	double cur_res;
+
+	for (auto&i : neurons) {
+		i.inputValues(v);
+		cur_res = i.sygmoid(i.multiplie());
+
+		if (cur_res > val) {
+			val = cur_res;
+			ans = i.output();
+		}
+	}
+
+	return ans;
+}
+
+void MakeInputValues(std::vector<double>& v) {
+	if (v[0] < 500) v[0]++;
+	else if (v[1] < 500) v[1]++;
 	else {
-		v1 = 500; v2 = 500;
+		v[0] = 0; v[1] = 0;
 	}
 	return;
 }
 
 int main() {
-	/*freopen("a.in", "r", stdin);
-	freopen("a.out", "w", stdout);*/
-
 #define LR double(0.1)
-
+#define LayerSize int(1001)
 	std::ios::sync_with_stdio(false);
 	srand(time(NULL));
 
 	std::vector<Neuron> neurons;
 
-	MakeWeb(neurons);
+	MakeWeb(neurons, LayerSize);
 
-	int val1 = 500;
-	int val2 = 500;
-	int cnt = 0;
-	int mx = cnt;
+	std::vector<double> input(2,0);
 
-	while (true) {
-		int ans = UseWeb(neurons, val1, val2);
-		int TrueResult = val1 + val2;
+	double last_error = 10000;
+	double error = 10000;
+	int ans_rate = 0;
+	int true_ans;
+	int cur_ans;
 
-		if (ans != TrueResult) {
-			cnt = 0;
+	while (true) {	//net's learn
+		true_ans = input[0] + input[1];
 
-			for (auto& i : neurons) {
-				if (i.output() > TrueResult)
-					if (i.activate(i.multiplie())) i.learn(0, LR);
-				else if (!i.activate(i.multiplie())) i.learn(0.75, LR);
+		for (auto&i : input) i /= 500.;
+
+		if (error < 5 && error > 3) break;
+
+		error = 0;
+
+		cur_ans = UseWeb(neurons, input);
+
+		if (cur_ans != true_ans) {
+			std::vector<double> answers(LayerSize);
+
+			answers[true_ans] = 1;
+
+			for (int i = true_ans; i < answers.size() - 1; i++) answers[i + 1] = answers[i] - 0.001;
+			for (int i = true_ans; i > 0; i--) answers[i - 1] = answers[i] - 0.001;
+
+			for (auto&i : neurons) {
+				error += kv(answers[i.output()], i.sygmoid(i.multiplie()));
+
+				i.learn(answers[i.output()], LR);
 			}
+
+			ans_rate = 0;
 		}
-		else if (cnt >= 1000) break;
-		else cnt++;
+		else ans_rate++;
 
-		system("cls");
-		if (mx < cnt) mx = cnt;
-		std::cout << mx;
+		for (auto&i : input) i *= 500.;
 
-		MakeInputValues(val1, val2);
+		MakeInputValues(input);
+
+		//system("cls");
+		std::cout << error << '\n';
 	}
 
-	while (std::cin >> val1 >> val2)
-		std::cout << UseWeb(neurons, val1, val2) << '\n';
+	_sleep(1000);
+
+	system("cls");
+
+	std::vector<double> val(2);
+
+	while (std::cin >> val[0]>>val[1]) {
+
+		std::cout << UseWeb(neurons, val);
+
+		_sleep(1000);
+
+		system("cls");
+	}
 
 	return 0;
 }

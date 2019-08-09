@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
+#include <string>
 #include <ctime>
 #include <cmath>
 
@@ -10,18 +11,13 @@ class Neuron
 public:
 	Neuron(int num) {
 		number = num;
-		inputs.resize(2);
-		weights.resize(2);
+		inputs.resize(5);
+		weights.resize(5);
 	}
 
-	void inputValues(std::vector<double> val) {
-		for (int i = 0; i < val.size(); i++) inputs[i] = val[i];
-	}
+	void inputValues(std::vector<double>& v) { for (int i = 0; i < v.size(); i++) inputs[i] = v[i]; }
 
-	void setWeights() {
-		weights[0]= double(rand() % 99 + 1) / 100.;
-		weights[1] = weights[0];
-	}
+	void setWeights() { for (auto&i : weights) i = double(rand() % 99 + 1) / 100.; }
 
 	double multiplie() {
 		double sum = 0;
@@ -31,32 +27,28 @@ public:
 		return sum;
 	}
 
-	bool activate(double val) {
-		double res = 1 / (1 + exp(-2 * val));
-		return res >= 0.75;
-	}
-
-	int output() {return number;}
+	int output() { return number; }
 
 	double sygmoid(double x) {
-		return 1 / (1 + exp(-2 * x));
+		return 1 / (1 + exp(-1 * x));
 	}
 
-	double sygmoid_dX(double x) {
-		return sygmoid(x)*(1 - sygmoid(x));
-	}
+	double sygmoid_dX(double x) { return sygmoid(x)*(1 - sygmoid(x)); }
 
-	void learn(double ExpRes,double LearningRate) {
+	void learn(double ExpRes, double LearningRate) {
 		double x = multiplie();
 		double CurRes = sygmoid(x);
 		double error = CurRes - ExpRes;
-		double WeightsDelta = error * sygmoid_dX(x);
+		double dX = sygmoid_dX(x);
+		double WeightsDelta = error * dX;
 
 		for (int i = 0; i < weights.size(); i++)
 			weights[i] = weights[i] - inputs[i] * WeightsDelta * LearningRate;
 
 		return;
 	}
+
+	double weights_output(const int point) { return weights[point]; }
 
 private:
 	std::vector<double> weights;
